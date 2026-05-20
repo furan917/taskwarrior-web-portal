@@ -191,9 +191,10 @@ templ formFields(f taskForm, udas []tw.UDA, projects, tags []string, allOpenTask
 				<p class="col-span-2 -mt-2 text-xs text-zinc-500 dark:text-zinc-400">Recurrence belongs to the parent template - edit there to change schedule. Find it under More <span class="text-zinc-400">▾</span> Built-in <span class="text-zinc-400">▾</span> Recurring.</p>
 			}
 		</div>
-		if len(udas) > 0 {
+		{{ editableUDAs := nonTrackerUDAs(udas) }}
+		if len(editableUDAs) > 0 {
 			<div class="grid grid-cols-2 gap-3">
-				for _, u := range udas {
+				for _, u := range editableUDAs {
 					@udaField(u, f.UDAs[u.Name])
 				}
 			</div>

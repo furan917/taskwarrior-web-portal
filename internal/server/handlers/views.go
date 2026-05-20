@@ -601,15 +601,16 @@ func csrfToken(r *http.Request) string { return CSRFToken(r.Context()) }
 
 // ConfigInfo renders the read-only /config page showing non-sensitive
 // Taskwarrior and portal configuration values.
-func (v *Views) ConfigInfo(s *Sync) http.HandlerFunc {
+func (v *Views) ConfigInfo(s *Sync, bw *Bugwarrior) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		info := v.TW.GetConfigInfo(r.Context())
 		portal := views.PortalConfig{
-			BindAddr:     config.Addr(),
-			AllowedHosts: config.AllowedHosts(),
+			BindAddr:            config.Addr(),
+			AllowedHosts:        config.AllowedHosts(),
+			BugwarriorAvailable: bw.Available(),
 		}
 		page := v.buildPage(r, "Configuration", "config", false)
-		renderHTML(w, r, "Config", views.ConfigInfoPage(page, info, portal, s.Result()), v.Logger)
+		renderHTML(w, r, "Config", views.ConfigInfoPage(page, info, portal, s.Result(), bw.Result()), v.Logger)
 	}
 }
 

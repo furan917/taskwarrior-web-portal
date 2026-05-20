@@ -22,6 +22,9 @@ templ ModalEdit(csrf string, t tw.Task, udas []tw.UDA, projects, tags []string, 
 			} else if t.Status == "completed" {
 				@modalEditBanner("zinc", "This task is completed. Editing here will not change its history.")
 			}
+			if info := BugTrackerInfoFor(t.UDAs); info != nil {
+				@bugTrackerEditBanner(info)
+			}
 			@formFields(taskForm{
 				Description: t.Description,
 				Project:     t.Project,
@@ -127,6 +130,18 @@ templ ModalEdit(csrf string, t tw.Task, udas []tw.UDA, projects, tags []string, 
 // recurring template (changes affect future instances), deleted, completed.
 templ modalEditBanner(tone, msg string) {
 	<div class={ modalEditBannerClass(tone) }>{ msg }</div>
+}
+
+templ bugTrackerEditBanner(info *BugTrackerInfo) {
+	<div class={ modalEditBannerClass("amber") }>
+		<span>Managed externally: { info.Name } · </span>
+		if info.URL != "" {
+			<a href={ templ.SafeURL(info.URL) } target="_blank" rel="noopener noreferrer" class="font-semibold underline underline-offset-2 hover:opacity-80">{ info.Label }</a>
+		} else {
+			<span class="font-semibold">{ info.Label }</span>
+		}
+		<span class="opacity-70">. Edits may be overwritten.</span>
+	</div>
 }
 
 // modalOverflowMenu collapses the rarely-used Duplicate (and conditional

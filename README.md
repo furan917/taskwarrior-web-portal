@@ -49,7 +49,8 @@ All settings are optional environment variables. Defaults work for a standard de
 |---|---|---|
 | `TWP_BIND_HOST` | `127.0.0.1` | Address to listen on. Set to `0.0.0.0` for container or LAN access. |
 | `TWP_BIND_PORT` | `5050` | Port to listen on. |
-| `TWP_ALLOWED_HOSTS` | _(none)_ | Comma-separated bare hostnames or IPs that are allowed to reach the portal (e.g. `192.168.1.10,myhostname`). The port is appended automatically from `TWP_BIND_PORT` — do not include it here. |
+| `TWP_ALLOWED_HOSTS` | _(none)_ | Comma-separated bare hostnames or IPs that are allowed to reach the portal (e.g. `192.168.1.10,myhostname`). The port is appended automatically from `TWP_BIND_PORT` - do not include it here. |
+| `BUGWARRIOR_BIN` | _(auto-detect)_ | Absolute path to the `bugwarrior` binary. Only needed when bugwarrior is installed in a custom location (e.g. a virtualenv). Auto-detected via `PATH` and common install directories (`~/.local/bin`, `~/.local/pipx/venvs/bugwarrior/bin`, `/usr/local/bin`, etc.) when unset. |
 
 `TWP_BIND_HOST` and `TWP_BIND_PORT` are the only knobs for the service itself. `TWP_ALLOWED_HOSTS` is only needed when you access the portal from a different machine or hostname — the defaults (`localhost` and `127.0.0.1`) cover a standard single-machine install.
 
@@ -264,6 +265,21 @@ Type mapping for input controls:
 UDA names must match `^[a-zA-Z][a-zA-Z0-9_]{0,63}$`; entries with shell metacharacters or parser tokens are dropped at discovery time.
 
 UDA values render as first-class rows in the row info panel, one per UDA, separated from the built-in fields by a thin grey rule. `priority` is treated as a UDA on read (Taskwarrior 3.x emits it at the top level of the export JSON even when redeclared as a UDA); the form's Priority dropdown stays in sync.
+
+## Bugwarrior
+
+[bugwarrior](https://bugwarrior.readthedocs.io/) is a separate tool that pulls issues from bug trackers (GitHub, GitLab, Jira, Bugzilla, Linear, and 20+ others) into Taskwarrior as tasks with service-specific UDAs (`githubnumber`, `jiraid`, etc.).
+
+When `bugwarrior` is installed and detectable, the portal surfaces it in two places:
+
+- **Config page** - a **Pull now** button that runs `bugwarrior pull` and streams the result inline. The button only appears when the binary is found.
+- **Task UI** - tasks imported by bugwarrior show a tracker chip (e.g. `GH #142`) in the row, kanban card, and expanded detail panel. The edit modal displays an amber banner ("Managed externally: GitHub - GH #142. Edits may be overwritten.") and hides the service UDA fields from the form since bugwarrior owns them.
+
+bugwarrior is auto-detected on startup. If it is installed in a non-standard location (a virtualenv, a Docker volume mount, etc.), set `BUGWARRIOR_BIN` to its absolute path. When using `make install`, pass it at install time so it is baked into the service unit:
+
+```sh
+BUGWARRIOR_BIN=/home/user/.local/bin/bugwarrior make install
+```
 
 ## Contexts
 

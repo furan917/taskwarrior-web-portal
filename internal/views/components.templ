@@ -2,6 +2,22 @@ package views
 
 import "fmt"
 
+// bugTrackerChip renders a compact linked badge for a bug-tracker issue.
+// Used in row chips, kanban cards, and the expanded detail panel.
+templ bugTrackerChip(info *BugTrackerInfo) {
+	if info.URL != "" {
+		<a
+			href={ templ.SafeURL(info.URL) }
+			target="_blank"
+			rel="noopener noreferrer"
+			class="inline-flex items-center rounded bg-sky-100 px-2 py-0.5 text-xs text-sky-700 hover:bg-sky-200 dark:bg-sky-950/60 dark:text-sky-300 dark:hover:bg-sky-900/60"
+			title={ info.Name }
+		>{ info.Label }</a>
+	} else {
+		<span class="inline-flex items-center rounded bg-sky-100 px-2 py-0.5 text-xs text-sky-700 dark:bg-sky-950/60 dark:text-sky-300" title={ info.Name }>{ info.Label }</span>
+	}
+}
+
 // modalShell is the shared <dialog> wrapper for every modal in the app
 // (ModalAdd, ModalEdit, ContextForm, SessionsModal). It renders only the
 // dialog element + class, so callers retain full control of their own

@@ -31,6 +31,7 @@ func registerRoutes(mux *http.ServeMux, cfg Config) {
 	f := &handlers.Forms{TW: cfg.TW, Logger: cfg.Logger}
 	c := &handlers.Contexts{TW: cfg.TW, Logger: cfg.Logger}
 	s := &handlers.Sync{TW: cfg.TW, Logger: cfg.Logger}
+	bw := handlers.NewBugwarrior(cfg.Logger)
 
 	// All app routes go through CSRF middleware.
 	app := http.NewServeMux()
@@ -70,8 +71,9 @@ func registerRoutes(mux *http.ServeMux, cfg Config) {
 	app.HandleFunc("POST /tasks/{id}/denotate", t.Denotate)
 	app.HandleFunc("GET /done", v.Done)
 	app.HandleFunc("GET /stats", v.Stats)
-	app.HandleFunc("GET /config", v.ConfigInfo(s))
+	app.HandleFunc("GET /config", v.ConfigInfo(s, bw))
 	app.HandleFunc("POST /sync", s.Run)
+	app.HandleFunc("POST /bugwarrior-pull", bw.Pull)
 	app.HandleFunc("GET /timesheet", v.Timesheet)
 	app.HandleFunc("POST /timesheet/enable-tracking", v.EnableTimeTracking)
 	app.HandleFunc("GET /reports/time", v.TimeReport)

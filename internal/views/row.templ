@@ -74,8 +74,12 @@ templ rowFrame(t tw.Task, done bool) {
 					} else if t.IsRecurring() {
 						<span class="inline-flex items-center rounded bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-800 dark:bg-purple-950/60 dark:text-purple-200" title={ "Recurring instance - " + t.Recur }>↻ { t.Recur }</span>
 					}
+					{{ trackerInfo := BugTrackerInfoFor(t.UDAs) }}
+					if trackerInfo != nil {
+						@bugTrackerChip(trackerInfo)
+					}
 					for name, value := range t.UDAs {
-						if value != "" {
+						if !IsBugTrackerUDA(name) && value != "" {
 							<span class="inline-flex items-center rounded bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">{ name }: { value }</span>
 						}
 					}
@@ -301,24 +305,33 @@ templ rowDetailGrid(t tw.Task) {
 			// punt until we can prefetch via one `task export depends.any:`
 			// pass and join in Go.
 		}
-		// First-class UDA rendering: each UDA with a non-empty value gets its
-		// own dt/dd pair, sitting at the bottom of the grid after all the
-		// built-in fields. A thin grey rule above the section visually
-		// separates "built-in task data" from "user-defined attributes".
-		// The first UDA forces sm:col-start-1 (via the "left" kind) so it
-		// lands at the leftmost column right under the rule; subsequent UDAs
-		// flow naturally and pair up two-per-row at sm+ widths.
-		if udaNames := sortedUDANames(t.UDAs); len(udaNames) > 0 {
+		// Extended data section: bug tracker row (if any) + remaining UDAs.
+		// A thin divider separates this block from the built-in fields above.
+		{{ detailTrackerInfo := BugTrackerInfoFor(t.UDAs) }}
+		{{ nonTrackerNames := sortedNonTrackerUDANames(t.UDAs) }}
+		if detailTrackerInfo != nil || len(nonTrackerNames) > 0 {
 			<div class="col-span-2 mt-1 border-t border-zinc-200 dark:border-zinc-800 sm:col-span-4" aria-hidden="true"></div>
-			for i, name := range udaNames {
-				if i == 0 {
-					@detailRow(udaDisplayLabel(name), "left") {
-						<span class="break-words">{ t.UDAs[name] }</span>
-					}
+		}
+		if detailTrackerInfo != nil {
+			@detailRow("Tracker", "long") {
+				if detailTrackerInfo.URL != "" {
+					<a href={ templ.SafeURL(detailTrackerInfo.URL) } target="_blank" rel="noopener noreferrer" class="text-blue-700 hover:underline dark:text-blue-400">{ detailTrackerInfo.Label }</a>
 				} else {
-					@detailRow(udaDisplayLabel(name), "") {
-						<span class="break-words">{ t.UDAs[name] }</span>
-					}
+					{ detailTrackerInfo.Label }
+				}
+				if detailTrackerInfo.Repo != "" {
+					<span class="ml-2 text-zinc-400 dark:text-zinc-500">{ detailTrackerInfo.Repo }</span>
+				}
+			}
+		}
+		for i, name := range nonTrackerNames {
+			if i == 0 {
+				@detailRow(udaDisplayLabel(name), "left") {
+					<span class="break-words">{ t.UDAs[name] }</span>
+				}
+			} else {
+				@detailRow(udaDisplayLabel(name), "") {
+					<span class="break-words">{ t.UDAs[name] }</span>
 				}
 			}
 		}
