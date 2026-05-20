@@ -70,8 +70,8 @@ func TestBugTrackerInfoFor_GitLab(t *testing.T) {
 
 func TestBugTrackerInfoFor_Jira(t *testing.T) {
 	udas := map[string]string{
-		"jiraid":   "PROJ-789",
-		"jiraurl":  "https://jira.example.com/browse/PROJ-789",
+		"jiraid":     "PROJ-789",
+		"jiraurl":    "https://jira.example.com/browse/PROJ-789",
 		"jirastatus": "In Progress",
 	}
 	info := BugTrackerInfoFor(udas)
