@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.5.0](https://github.com/furan917/taskwarrior-web-portal/compare/v1.4.5...v1.5.0) (2026-05-20)
+
+
+### Features
+
+* bugwarrior integration ([2be64d4](https://github.com/furan917/taskwarrior-web-portal/commit/2be64d4448b71ccd89f37aa33009c6e86fac51b4))
+
+
+### Bug Fixes
+
+* add basic kanban to portal ([509bfed](https://github.com/furan917/taskwarrior-web-portal/commit/509bfed972acd0f0a611c2c693c691ffa2b163c8))
+* fix fmt for cli ([d17f190](https://github.com/furan917/taskwarrior-web-portal/commit/d17f1907df0a7b33fcf7dab070fa3a1c2e6ac021))
+
 ## [1.4.5](https://github.com/furan917/taskwarrior-web-portal/compare/v1.4.4...v1.4.5) (2026-05-16)
 
 
