@@ -266,6 +266,18 @@ UDA names must match `^[a-zA-Z][a-zA-Z0-9_]{0,63}$`; entries with shell metachar
 
 UDA values render as first-class rows in the row info panel, one per UDA, separated from the built-in fields by a thin grey rule. `priority` is treated as a UDA on read (Taskwarrior 3.x emits it at the top level of the export JSON even when redeclared as a UDA); the form's Priority dropdown stays in sync.
 
+### Managing UDAs
+
+**Lookups → UDAs** (or `/udas`) opens the manage page listing every user-defined attribute with its type, label, and optional allowed values. From there:
+
+- **New UDA** - opens a modal with Name, Type (string / numeric / date / duration), Label, and an optional Values field (comma-separated list to restrict string UDAs to a fixed set of choices). Submits to `POST /udas`.
+- **Edit** - pre-fills the same modal. Type changes are allowed but take effect only for new values (existing task data is not migrated). Submits to `PUT /udas/{name}`.
+- **Delete** - removes all three config keys (`uda.<name>.type`, `.label`, `.values`) with a confirmation prompt. Existing task values for that key become orphaned (Taskwarrior ignores unknown UDAs on export). `DELETE /udas/{name}`.
+
+The built-in `priority` UDA is shown as read-only (a "built-in" badge replaces the edit/delete buttons) since it is managed by Taskwarrior itself.
+
+After any mutation the UDA cache is invalidated immediately so the add/edit modals reflect the new schema without waiting for the 60s TTL.
+
 ## Bugwarrior
 
 [bugwarrior](https://bugwarrior.readthedocs.io/) is a separate tool that pulls issues from bug trackers (GitHub, GitLab, Jira, Bugzilla, Linear, and 20+ others) into Taskwarrior as tasks with service-specific UDAs (`githubnumber`, `jiraid`, etc.).
@@ -313,6 +325,30 @@ The Add Task modal carries its own context dropdown in the header, defaulting to
 The prefill is derived from each context's read filter via `views.ContextPrefill`: first lowercase `+tag` wins, otherwise first `project:value` wins, ALL-UPPERCASE virtual tags are skipped. For an OR-shaped filter like `+team or project:team or project:hiring`, the picker prefills `+team`.
 
 Note: Taskwarrior's per-context **write** filter is NOT applied automatically by the binary for OR-shaped filters - it gets confused and mangles the description. The form-level prefill is the only reliable way to keep new tasks consistent with the lens the user is working in.
+
+## Kanban column moves
+
+Each card on `/kanban` has a move button (four-arrow icon, top-right corner) that opens a column picker dropdown. The current column is shown with a checkmark and is not clickable; the other columns are selectable:
+
+- **Inbox / Backlog / In Progress / On Hold** - adjusts the three column tags (`+inbox`, `+inprogress`, `+onhold`). Moving away from In Progress automatically stops the task if it was being time-tracked.
+- **Done** - shows a confirmation dialog first, then calls `task done` to complete the task (it disappears from the board).
+
+The button is always visible on mobile and appears on hover on desktop. `POST /tasks/{id}/move` with `column=<target>`.
+
+## Project and tag rename
+
+From any project drilldown (`/project/{name}`) or tag drilldown (`/tag/{name}`), a **Rename** button opens a modal pre-filled with the current name. Submitting runs a single bulk modify across all matching tasks:
+
+- **Project rename**: `task project:<old> modify project:<new>` - moves every task in the project to the new name in one call.
+- **Tag rename**: `task +<old> modify -<old> +<new>` - swaps the tag on every task that carries it.
+
+Both operations bypass the active context filter (`rc.context=none`) so all tasks are affected regardless of which context is currently set. The projects and tags caches are invalidated on success so autocomplete dropdowns reflect the new names immediately.
+
+## Tag merge
+
+From any tag drilldown (`/tag/{name}`), a **Merge into** button opens a modal with a searchable dropdown listing all other tags. Selecting a target and confirming runs `task +<from> modify -<from> +<to>`, effectively collapsing every task tagged `<from>` into `<to>`. The source tag disappears once all tasks are retagged.
+
+Like rename, merge bypasses the active context filter and invalidates the tags cache on success.
 
 ## Dependencies
 
