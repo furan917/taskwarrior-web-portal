@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.6.0](https://github.com/furan917/taskwarrior-web-portal/compare/v1.5.0...v1.6.0) (2026-05-21)
+
+
+### Features
+
+* UDA + Project and Tag management ([c90a21a](https://github.com/furan917/taskwarrior-web-portal/commit/c90a21a43f19f7bbf7b499527ed022d119d56318))
+
+
+### Bug Fixes
+
+* missed README update in last commit ([56e115c](https://github.com/furan917/taskwarrior-web-portal/commit/56e115c166d0f6050f47e29329f01c47e6920f00))
+
 ## [1.5.0](https://github.com/furan917/taskwarrior-web-portal/compare/v1.4.5...v1.5.0) (2026-05-20)
 
 
