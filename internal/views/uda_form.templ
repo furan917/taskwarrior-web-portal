@@ -1,0 +1,90 @@
+package views
+
+templ UDAFormModal(csrf, name, udaType, label, values string, isNew bool) {
+	@modalShell("task-modal") {
+		if isNew {
+			@modalHeader("New UDA")
+		} else {
+			@modalHeader("Edit UDA")
+		}
+		<form
+			if isNew {
+				hx-post="/udas"
+			} else {
+				hx-put={ "/udas/" + name }
+			}
+			hx-target-error="#uda-form-errors"
+			hx-swap="none"
+		>
+			<input type="hidden" name="_csrf" value={ csrf }/>
+			<div class="flex flex-col gap-4 p-4">
+				<label class="block text-sm">
+					<span class="font-medium text-zinc-700 dark:text-zinc-300">Name</span>
+					<input
+						type="text"
+						name="name"
+						value={ name }
+						required
+						autofocus
+						if !isNew {
+							disabled
+						}
+						pattern="[a-zA-Z][a-zA-Z0-9_]*"
+						title="Must start with a letter, then letters, digits, or underscores"
+						class="mt-1 block w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-blue-400 dark:focus:ring-blue-400 disabled:opacity-60"
+					/>
+					<span class="mt-0.5 block text-xs text-zinc-400 dark:text-zinc-500">Letters, digits, underscore only. Cannot be changed after creation.</span>
+				</label>
+				<label class="block text-sm">
+					<span class="font-medium text-zinc-700 dark:text-zinc-300">Type</span>
+					<select
+						id="uda-type-select"
+						name="type"
+						required
+						class="mt-1 block w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-blue-400 dark:focus:ring-blue-400"
+					>
+						<option value="string" selected?={ udaType == "string" || udaType == "" }>string</option>
+						<option value="numeric" selected?={ udaType == "numeric" }>numeric</option>
+						<option value="date" selected?={ udaType == "date" }>date</option>
+						<option value="duration" selected?={ udaType == "duration" }>duration</option>
+					</select>
+					<span id="uda-type-hint" class="mt-0.5 block text-xs text-zinc-400 dark:text-zinc-500"></span>
+				</label>
+				<label class="block text-sm">
+					<span class="font-medium text-zinc-700 dark:text-zinc-300">Label</span>
+					<input
+						type="text"
+						name="label"
+						value={ label }
+						required
+						placeholder="Human-friendly column heading"
+						class="mt-1 block w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-blue-400 dark:focus:ring-blue-400"
+					/>
+				</label>
+				<div id="uda-values-section" class="block text-sm">
+					<label class="block">
+						<span class="font-medium text-zinc-700 dark:text-zinc-300">Values <span class="font-normal text-zinc-400 dark:text-zinc-500">(optional)</span></span>
+						<input
+							type="text"
+							name="values"
+							value={ values }
+							placeholder="e.g. high,medium,low"
+							class="mt-1 block w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-blue-400 dark:focus:ring-blue-400"
+						/>
+						<span class="mt-0.5 block text-xs text-zinc-400 dark:text-zinc-500">Comma-separated list restricts input to these choices. Leave empty to allow any text.</span>
+					</label>
+				</div>
+				<div id="uda-form-errors" class="empty:hidden rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300"></div>
+			</div>
+			<div class="flex items-center justify-end gap-2 border-t border-zinc-200 px-4 py-3 dark:border-zinc-700">
+				<button type="button" data-dismiss-modal class="rounded px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800">Cancel</button>
+				if isNew {
+					<button type="submit" data-close-on-success class="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-950">Create</button>
+				} else {
+					<button type="submit" data-close-on-success class="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-950">Save</button>
+				}
+			</div>
+		</form>
+	}
+}
+

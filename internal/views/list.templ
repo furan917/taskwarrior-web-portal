@@ -2,6 +2,7 @@ package views
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/furan917/taskwarrior-web-portal/internal/tw"
 )
@@ -18,7 +19,14 @@ import (
 templ ListPage(p Page, report, project string, tasks []tw.Task, sort SortSpec, filter string) {
 	@Layout(p) {
 		<div class="mb-3 flex items-baseline justify-between">
-			<h2 class="text-lg font-medium">{ p.Title }</h2>
+			<div class="flex items-baseline gap-3">
+				<h2 class="text-lg font-medium">{ p.Title }</h2>
+				if project != "" {
+					<button type="button" hx-get={ "/forms/project/" + project + "/rename" } hx-target="#modal" class="text-xs text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300">Rename</button>
+				} else if strings.HasPrefix(report, "tag-") {
+					<button type="button" hx-get={ "/forms/tag/" + report[4:] + "/rename" } hx-target="#modal" class="text-xs text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300">Rename</button>
+				}
+			</div>
 			@Indicator()
 		</div>
 		@BulkBar()

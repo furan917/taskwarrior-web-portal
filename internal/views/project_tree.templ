@@ -12,15 +12,20 @@ templ ProjectTree(roots []ProjectTreeNode) {
 
 templ projectTreeNode(node ProjectTreeNode, depth int) {
 	if len(node.Children) == 0 {
-		// Leaf - plain link row.
+		// Leaf - link row with rename action.
 		<li>
-			<a
-				href={ templ.SafeURL("/project/" + node.FullName) }
-				class={ "flex items-center justify-between px-3 py-2 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 " + depthPaddingClass(depth) }
-			>
-				<span class="truncate text-zinc-800 dark:text-zinc-200">{ node.FullName }</span>
-				@projectNodeMeta(node)
-			</a>
+			<div class={ "flex items-center justify-between px-3 py-2 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 " + depthPaddingClass(depth) }>
+				<a href={ templ.SafeURL("/project/" + node.FullName) } class="flex-1 truncate text-zinc-800 dark:text-zinc-200">{ node.FullName }</a>
+				<div class="flex shrink-0 items-center gap-1">
+					@projectNodeMeta(node)
+					<button
+						type="button"
+						hx-get={ "/forms/project/" + node.FullName + "/rename" }
+						hx-target="#modal"
+						class="ml-1 text-xs text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+					>Rename</button>
+				</div>
+			</div>
 		</li>
 	} else {
 		// Branch - open by default only at the top level so a deep

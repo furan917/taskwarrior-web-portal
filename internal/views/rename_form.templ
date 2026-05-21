@@ -1,0 +1,54 @@
+package views
+
+templ RenameFormModal(csrf, currentName, kind string) {
+	@modalShell("task-modal") {
+		if kind == "project" {
+			@modalHeader("Rename project")
+		} else {
+			@modalHeader("Rename tag")
+		}
+		<form
+			if kind == "project" {
+				hx-post={ "/projects/" + currentName + "/rename" }
+			} else {
+				hx-post={ "/tags/" + currentName + "/rename" }
+			}
+			hx-target-error="#rename-form-errors"
+			hx-swap="none"
+		>
+			<input type="hidden" name="_csrf" value={ csrf }/>
+			<div class="flex flex-col gap-4 p-4">
+				<label class="block text-sm">
+					<span class="font-medium text-zinc-700 dark:text-zinc-300">New name</span>
+					<input
+						type="text"
+						name="new_name"
+						value={ currentName }
+						required
+						autofocus
+						if kind == "project" {
+							pattern="[a-zA-Z0-9._]+"
+							title="Letters, digits, dots, and underscores only"
+						} else {
+							pattern="[a-zA-Z0-9_\-]+"
+							title="Letters, digits, dashes, and underscores only"
+						}
+						class="mt-1 block w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-blue-400 dark:focus:ring-blue-400"
+					/>
+				</label>
+				<p class="text-xs text-zinc-500 dark:text-zinc-400">
+					if kind == "project" {
+						This renames the project across all pending and waiting tasks.
+					} else {
+						This renames the tag across all pending and waiting tasks.
+					}
+				</p>
+				<div id="rename-form-errors" class="empty:hidden rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300"></div>
+			</div>
+			<div class="flex items-center justify-end gap-2 border-t border-zinc-200 px-4 py-3 dark:border-zinc-700">
+				<button type="button" data-dismiss-modal class="rounded px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800">Cancel</button>
+				<button type="submit" data-close-on-success class="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-950">Rename</button>
+			</div>
+		</form>
+	}
+}

@@ -99,13 +99,19 @@ func (v *Views) specForReport(name string) (reportSpec, bool) {
 // it here ensures it still surfaces in the More dropdown alongside its
 // peers. customReports() dedupes against curatedReportSpecs so it never
 // ends up in the Custom section.
-var builtinReportNames = []string{"active", "blocked", "overdue", "recurring", "waiting"}
+// builtinReportNames is the curated subset shown in the Built-in nav dropdown.
+// Does NOT include "waiting" - that lives in the top nav bar instead.
+var builtinReportNames = []string{"active", "blocked", "overdue", "recurring"}
 
-// isBuiltinReport reports whether name is in the curated TW built-in set.
-// Used both to admit /r/<name> routes for built-ins and to exclude them
-// from the "Custom" dropdown section (since they get their own header).
+// builtinRouteNames is the full set of TW built-in reports accessible via
+// /r/<name>. Superset of builtinReportNames: includes "waiting" so the top-nav
+// link works even though "waiting" is not listed in the Built-in dropdown.
+var builtinRouteNames = []string{"active", "blocked", "overdue", "recurring", "waiting"}
+
+// isBuiltinReport reports whether name is in the accessible built-in route set.
+// Used to admit /r/<name> routes and to exclude built-ins from the "Custom" section.
 func isBuiltinReport(name string) bool {
-	return slices.Contains(builtinReportNames, name)
+	return slices.Contains(builtinRouteNames, name)
 }
 
 // dynamicReportSpec resolves a report name to a reportSpec when the name is

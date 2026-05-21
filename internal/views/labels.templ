@@ -42,16 +42,32 @@ templ labelColumn(title, kind string, items []Counted) {
 			<ul class="divide-y divide-zinc-200 rounded border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
 				for _, item := range items {
 					<li>
-						<a href={ labelHref(kind, item.Name) } class="flex items-center justify-between px-3 py-2 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800">
-							<span class="truncate text-zinc-800 dark:text-zinc-200">
+						<div class="flex items-center justify-between px-3 py-2 hover:bg-zinc-50 dark:hover:bg-zinc-800">
+							<a href={ labelHref(kind, item.Name) } class="flex-1 truncate text-sm text-zinc-800 dark:text-zinc-200">
 								if kind == "tag" {
 									+{ item.Name }
 								} else {
 									{ item.Name }
 								}
-							</span>
-							<span class="ml-2 inline-flex items-center rounded bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">{ fmt.Sprintf("%d", item.Count) }</span>
-						</a>
+							</a>
+							<div class="flex items-center gap-1">
+								<span class="inline-flex items-center rounded bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">{ fmt.Sprintf("%d", item.Count) }</span>
+								if kind == "tag" {
+									<button
+										type="button"
+										hx-get={ "/forms/tag/" + item.Name + "/rename" }
+										hx-target="#modal"
+										class="min-h-[44px] px-2 text-xs text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+									>Rename</button>
+									<button
+										type="button"
+										hx-get={ "/forms/tag/" + item.Name + "/merge" }
+										hx-target="#modal"
+										class="min-h-[44px] px-2 text-xs text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+									>Merge</button>
+								}
+							</div>
+						</div>
 					</li>
 				}
 			</ul>

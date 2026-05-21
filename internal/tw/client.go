@@ -33,6 +33,7 @@ var safetyArgs = []string{
 	"rc.confirmation=no",
 	"rc.recurrence.confirmation=no",
 	"rc.json.array=on",
+	"rc.bulk=0",
 }
 
 type Client struct {
@@ -198,6 +199,31 @@ func (c *Client) Run(ctx context.Context, args ...string) error {
 	}
 	full := c.argv(args...)
 	_, err := c.runRaw(ctx, full)
+	if err == nil || IsNoOpExit(err) {
+		c.tags.invalidate()
+		c.projects.invalidate()
+	}
+	return err
+}
+
+// RunNoContext executes `task rc.context=none <args>`, bypassing any active
+// context filter. Use this for bulk admin operations (rename, merge) that must
+// affect ALL matching tasks regardless of what context the user currently has
+// active - a project-based context would otherwise AND with a project: filter
+// and silently match nothing.
+func (c *Client) RunNoContext(ctx context.Context, args ...string) error {
+	if err := guardArgs(args); err != nil {
+		return err
+	}
+	full := make([]string, 0, len(safetyArgs)+1+len(args))
+	full = append(full, safetyArgs...)
+	full = append(full, "rc.context=none")
+	full = append(full, args...)
+	_, err := c.runRaw(ctx, full)
+	if err == nil || IsNoOpExit(err) {
+		c.tags.invalidate()
+		c.projects.invalidate()
+	}
 	return err
 }
 
@@ -221,6 +247,10 @@ func (c *Client) Add(ctx context.Context, bypassContextWrite bool, args ...strin
 		full = c.argv(args...)
 	}
 	_, err := c.runRaw(ctx, full)
+	if err == nil {
+		c.tags.invalidate()
+		c.projects.invalidate()
+	}
 	return err
 }
 
@@ -1004,7 +1034,7 @@ func (c *Client) ListUDAs(ctx context.Context) ([]UDA, error) {
 		typ := c.getRcKey(ctx, "rc.uda."+name+".type")
 		label := c.getRcKey(ctx, "rc.uda."+name+".label")
 		values := parseUDAValues(c.getRcKey(ctx, "rc.uda."+name+".values"))
-		udas = append(udas, UDA{Name: name, Type: typ, Label: label, Values: values})
+		udas = append(udas, UDA{Name: name, Type: typ, Label: label, Values: values, BuiltIn: builtinUDANames[name]})
 	}
 	return udas, nil
 }

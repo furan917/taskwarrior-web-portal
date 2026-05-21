@@ -8,12 +8,11 @@ var navTopLinks = []struct {
 	Key   string
 }{
 	{"/ready", "Ready", "ready"},
+	{"/r/waiting", "Waiting", "r-waiting"},
 	{"/next", "Next", "next"},
 	{"/agenda", "Agenda", "agenda"},
 	{"/calendar", "Calendar", "calendar"},
-	{"/browse", "Browse", "browse"},
 	{"/kanban", "Kanban", "kanban"},
-	{"/stats", "Stats", "stats"},
 }
 
 templ Nav(active, activeContext string, contexts []NamedContext, builtinReports, customReports []string) {
@@ -39,7 +38,8 @@ templ Nav(active, activeContext string, contexts []NamedContext, builtinReports,
 				for _, l := range navTopLinks {
 					@navLink(l.Href, l.Label, active == l.Key)
 				}
-				@moreMenu(active, builtinReports, customReports)
+				@lookupsMenu(active)
+				@builtinMenu(active, builtinReports, customReports)
 			</div>
 			// Right actions – always visible. Active indicator is last so it sits at
 			// the far-right edge; its dropdown uses right-0 which only works correctly
@@ -118,22 +118,26 @@ templ mobileNavDrawer(active string, builtinReports, customReports []string) {
 					@drawerSectionLabel("Lookups")
 					<div class="space-y-0.5">
 						@drawerNavLink("/contexts", "Contexts", active == "contexts")
-						@drawerNavLink("/done", "Done", active == "done")
-						@drawerNavLink("/forecast", "Forecast", active == "forecast")
+						@drawerNavLink("/udas", "UDAs", active == "udas")
+						@drawerNavLink("/browse", "Browse", active == "browse")
+					</div>
+					<div class="my-2 border-t border-zinc-200 dark:border-zinc-800"></div>
+					<div class="space-y-0.5">
+						@drawerNavLink("/stats", "Stats", active == "stats")
 						@drawerNavLink("/timesheet", "Timesheet", active == "timesheet")
 						@drawerNavLink("/reports/time", "Time by project", active == "time-report")
 					</div>
 				</div>
-				if len(builtinReports) > 0 {
-					<div class="mt-3 border-t border-zinc-200 pt-3 dark:border-zinc-800">
-						@drawerSectionLabel("Built-in")
-						<div class="space-y-0.5">
-							for _, name := range builtinReports {
-								@drawerNavLink("/r/"+name, reportDisplayLabel(name), active == "r-"+name)
-							}
-						</div>
+				<div class="mt-3 border-t border-zinc-200 pt-3 dark:border-zinc-800">
+					@drawerSectionLabel("Built-in")
+					<div class="space-y-0.5">
+						@drawerNavLink("/done", "Done", active == "done")
+						@drawerNavLink("/forecast", "Forecast", active == "forecast")
+						for _, name := range builtinReports {
+							@drawerNavLink("/r/"+name, reportDisplayLabel(name), active == "r-"+name)
+						}
 					</div>
-				}
+				</div>
 				if len(customReports) > 0 {
 					<div class="mt-3 border-t border-zinc-200 pt-3 dark:border-zinc-800">
 						@drawerSectionLabel("Custom")
@@ -169,45 +173,65 @@ templ navLink(href, label string, active bool) {
 	}
 }
 
-// moreMenu groups the lower-frequency reports (Forecast, Done) plus the
-// curated TW built-ins and any user-defined reports under a single dropdown
-// to keep the top-level nav scannable. Sections are only rendered if non-
-// empty so a user with no custom reports doesn't see an orphan header.
-//
-// Open state is driven by the same generic [data-popover-wrap] / data-open
-// machinery that powers the context pill (see web/static/js/context_pill.js).
-templ moreMenu(active string, builtinReports, customReports []string) {
+templ lookupsMenu(active string) {
 	<span class="relative inline-flex shrink-0" data-popover-wrap>
 		<button
 			type="button"
-			class={ moreTriggerClass(moreActive(active)) }
+			class={ navDropdownClass(lookupsActive(active)) }
 			aria-haspopup="menu"
-			aria-label="More reports"
+			aria-label="Lookups"
 			data-popover-trigger
 		>
-			<span>More</span>
+			<span>Lookups</span>
 			<span class="text-xs opacity-60" aria-hidden="true">▾</span>
 		</button>
 		<div
-			class="absolute left-0 top-full z-30 mt-1 hidden min-w-52 rounded-md border border-zinc-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900"
+			class="absolute left-0 top-full z-30 mt-1 hidden min-w-44 rounded-md border border-zinc-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900"
+			role="menu"
+			data-popover-menu
+		>
+			<div class="py-1 text-sm">
+				@moreMenuLink("/contexts", "Contexts", active == "contexts")
+				@moreMenuLink("/udas", "UDAs", active == "udas")
+				@moreMenuLink("/browse", "Browse", active == "browse")
+				<div class="my-1 border-t border-zinc-100 dark:border-zinc-800"></div>
+				@moreMenuLink("/stats", "Stats", active == "stats")
+				@moreMenuLink("/timesheet", "Timesheet", active == "timesheet")
+				@moreMenuLink("/reports/time", "Time by project", active == "time-report")
+			</div>
+		</div>
+	</span>
+}
+
+templ builtinMenu(active string, builtinReports, customReports []string) {
+	<span class="relative inline-flex shrink-0" data-popover-wrap>
+		<button
+			type="button"
+			class={ navDropdownClass(builtinActive(active)) }
+			aria-haspopup="menu"
+			aria-label="Built-in reports"
+			data-popover-trigger
+		>
+			<span>Built-in</span>
+			<span class="text-xs opacity-60" aria-hidden="true">▾</span>
+		</button>
+		<div
+			class="absolute left-0 top-full z-30 mt-1 hidden min-w-44 rounded-md border border-zinc-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900"
 			role="menu"
 			data-popover-menu
 		>
 			<div class="max-h-96 overflow-y-auto py-1 text-sm">
-				@moreSectionHeader("Lookups")
-				@moreMenuLink("/contexts", "Contexts", active == "contexts")
 				@moreMenuLink("/done", "Done", active == "done")
 				@moreMenuLink("/forecast", "Forecast", active == "forecast")
-				@moreMenuLink("/timesheet", "Timesheet", active == "timesheet")
-				@moreMenuLink("/reports/time", "Time by project", active == "time-report")
 				if len(builtinReports) > 0 {
-					@moreSectionHeader("Built-in")
+					<div class="my-1 border-t border-zinc-100 dark:border-zinc-800"></div>
 					for _, name := range builtinReports {
 						@moreMenuLink("/r/"+name, reportDisplayLabel(name), active == "r-"+name)
 					}
 				}
 				if len(customReports) > 0 {
-					@moreSectionHeader("Custom")
+					<div class="my-1 border-t border-zinc-100 dark:border-zinc-800"></div>
+					@navDropdownSectionLabel("Custom")
 					for _, name := range customReports {
 						@moreMenuLink("/r/"+name, reportDisplayLabel(name), active == "r-"+name)
 					}
@@ -217,28 +241,31 @@ templ moreMenu(active string, builtinReports, customReports []string) {
 	</span>
 }
 
-// moreActive flips the More trigger's active styling when any item inside
-// the dropdown matches the current page. This mirrors the navLink active
-// state so users always see "you are inside this menu".
-func moreActive(active string) bool {
-	if active == "forecast" || active == "done" || active == "timesheet" || active == "contexts" || active == "time-report" {
-		return true
-	}
-	if len(active) > 2 && active[:2] == "r-" {
+func lookupsActive(active string) bool {
+	switch active {
+	case "contexts", "udas", "browse", "stats", "timesheet", "time-report":
 		return true
 	}
 	return false
 }
 
-func moreTriggerClass(active bool) string {
+func builtinActive(active string) bool {
+	switch active {
+	case "done", "forecast":
+		return true
+	}
+	return len(active) > 2 && active[:2] == "r-"
+}
+
+func navDropdownClass(active bool) string {
 	if active {
 		return "shrink-0 inline-flex items-center gap-1 rounded bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
 	}
 	return "shrink-0 inline-flex items-center gap-1 rounded px-3 py-1.5 text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
 }
 
-templ moreSectionHeader(label string) {
-	<div class="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">{ label }</div>
+templ navDropdownSectionLabel(label string) {
+	<div class="px-3 pb-1 pt-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">{ label }</div>
 }
 
 // moreMenuLink is a plain anchor (not htmx) that closes the popover via the

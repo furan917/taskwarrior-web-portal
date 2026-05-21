@@ -32,6 +32,9 @@ func registerRoutes(mux *http.ServeMux, cfg Config) {
 	c := &handlers.Contexts{TW: cfg.TW, Logger: cfg.Logger}
 	s := &handlers.Sync{TW: cfg.TW, Logger: cfg.Logger}
 	bw := handlers.NewBugwarrior(cfg.Logger)
+	u := &handlers.UDAs{TW: cfg.TW, Logger: cfg.Logger}
+	lb := &handlers.Labels{TW: cfg.TW, Logger: cfg.Logger}
+	to := &handlers.TagOps{TW: cfg.TW, Logger: cfg.Logger}
 
 	// All app routes go through CSRF middleware.
 	app := http.NewServeMux()
@@ -85,6 +88,21 @@ func registerRoutes(mux *http.ServeMux, cfg Config) {
 	app.HandleFunc("POST /contexts", c.CreateContext)
 	app.HandleFunc("PUT /contexts/{name}", c.UpdateContext)
 	app.HandleFunc("DELETE /contexts/{name}", c.DeleteContext)
+
+	app.HandleFunc("GET /udas", u.ManageUDAs)
+	app.HandleFunc("GET /forms/uda/new", u.CreateUDAForm)
+	app.HandleFunc("GET /forms/uda/{name}", u.EditUDAForm)
+	app.HandleFunc("POST /udas", u.CreateUDA)
+	app.HandleFunc("PUT /udas/{name}", u.UpdateUDA)
+	app.HandleFunc("DELETE /udas/{name}", u.DeleteUDA)
+
+	app.HandleFunc("GET /forms/tag/{name}/rename", lb.RenameTagForm)
+	app.HandleFunc("GET /forms/project/{name}/rename", lb.RenameProjectForm)
+	app.HandleFunc("POST /tags/{name}/rename", lb.RenameTag)
+	app.HandleFunc("POST /projects/{name}/rename", lb.RenameProject)
+
+	app.HandleFunc("GET /forms/tag/{name}/merge", to.MergeTagForm)
+	app.HandleFunc("POST /tags/{name}/merge", to.MergeTag)
 
 	mux.Handle("/", withCSRF(cfg.Logger, app))
 }

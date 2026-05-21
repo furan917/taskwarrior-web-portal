@@ -28,6 +28,17 @@ type UDA struct {
 	// the built-in priority returns "H,M,L,"). ListUDAs strips that empty.
 	// The empty/clear case is handled by the form's separate "(none)" option.
 	Values []string
+
+	// BuiltIn is true for pseudo-UDAs that Taskwarrior configures internally
+	// (e.g. "priority"). They appear in `task _udas` output but are not safe
+	// to edit or delete via the portal.
+	BuiltIn bool
+}
+
+// builtinUDANames is the set of names that Taskwarrior ships as pseudo-UDAs.
+// These appear in `task _udas` but must not be editable through the portal.
+var builtinUDANames = map[string]bool{
+	"priority": true,
 }
 
 // UDANamePattern matches the conservative subset of identifiers we accept as

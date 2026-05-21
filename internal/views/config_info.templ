@@ -122,7 +122,15 @@ templ ConfigInfoPage(p Page, info tw.ConfigInfo, portal PortalConfig, syncResult
 			}
 		</div>
 		<div class="mt-6">
-			<h3 class="mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">User-defined Attributes</h3>
+			<div class="mb-2 flex items-center justify-between">
+				<h3 class="text-sm font-medium text-zinc-700 dark:text-zinc-300">User-defined Attributes</h3>
+				<button
+					type="button"
+					hx-get="/forms/uda/new"
+					hx-target="#modal"
+					class="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-950"
+				>+ New UDA</button>
+			</div>
 			if len(info.UDAs) == 0 {
 				<div class="rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
 					None defined
@@ -136,6 +144,7 @@ templ ConfigInfoPage(p Page, info tw.ConfigInfo, portal PortalConfig, syncResult
 								<th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Type</th>
 								<th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Label</th>
 								<th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Values</th>
+								<th class="px-4 py-2"></th>
 							</tr>
 						</thead>
 						<tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
@@ -145,6 +154,23 @@ templ ConfigInfoPage(p Page, info tw.ConfigInfo, portal PortalConfig, syncResult
 									<td class="px-4 py-2 text-zinc-600 dark:text-zinc-400">{ configOrDefault(u.Type, "string") }</td>
 									<td class="px-4 py-2 text-zinc-600 dark:text-zinc-400">{ configOrDefault(u.Label, u.Name) }</td>
 									<td class="px-4 py-2 text-zinc-500 dark:text-zinc-500">{ udaValuesText(u.Values) }</td>
+									<td class="px-4 py-2">
+										<div class="flex items-center justify-end gap-2">
+											<button
+												type="button"
+												hx-get={ "/forms/uda/" + u.Name }
+												hx-target="#modal"
+												class="text-xs text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+											>Edit</button>
+											<button
+												type="button"
+												hx-delete={ "/udas/" + u.Name }
+												hx-confirm={ "Delete UDA '" + u.Name + "'? This cannot be undone." }
+												hx-swap="none"
+												class="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+											>Delete</button>
+										</div>
+									</td>
 								</tr>
 							}
 						</tbody>

@@ -63,13 +63,22 @@
   }
   function open(picker) {
     const list = listOf(picker);
-    if (list) list.classList.remove('hidden');
+    if (!list) return;
+    const inp = inputOf(picker);
+    if (inp) {
+      const r = inp.getBoundingClientRect();
+      list.style.cssText = 'position:fixed;top:' + (r.bottom + 2) + 'px;left:' + r.left + 'px;width:' + r.width + 'px;right:auto;z-index:9999;';
+    }
+    list.classList.remove('hidden');
     if (openPicker && openPicker !== picker) close(openPicker);
     openPicker = picker;
   }
   function close(picker) {
     const list = listOf(picker);
-    if (list) list.classList.add('hidden');
+    if (list) {
+      list.classList.add('hidden');
+      list.style.cssText = '';
+    }
     clearHighlight(picker);
     if (openPicker === picker) openPicker = null;
   }
