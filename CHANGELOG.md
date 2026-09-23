@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.1](https://github.com/furan917/taskwarrior-web-portal/compare/v1.6.0...v1.6.1) (2026-09-23)
+
+
+### Bug Fixes
+
+* better handle recurring task form errors ([e7f2c78](https://github.com/furan917/taskwarrior-web-portal/commit/e7f2c78bc1e9e0c15e16bb5e0b16a299b352c4f3))
+
 ## [1.6.0](https://github.com/furan917/taskwarrior-web-portal/compare/v1.5.0...v1.6.0) (2026-05-21)
 
 
