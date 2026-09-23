@@ -148,6 +148,10 @@ func writeIfTaskParseError(w http.ResponseWriter, err error) bool {
 	if stderr == "" {
 		return false
 	}
+	if strings.Contains(stderr, "recurring") && strings.Contains(stderr, "due") {
+		writeTaskErrorFragment(w, "due", "A recurring task also needs a Due date. Set Due, or clear Recur.")
+		return true
+	}
 	dateLike := strings.Contains(stderr, "date") &&
 		(strings.Contains(stderr, "interpret") ||
 			strings.Contains(stderr, "not a valid") ||
@@ -157,8 +161,14 @@ func writeIfTaskParseError(w http.ResponseWriter, err error) bool {
 	if !dateLike {
 		return false
 	}
+	writeTaskErrorFragment(w, "", "Taskwarrior rejected one of the dates. Try +2d, tomorrow, eod, or YYYY-MM-DD.")
+	return true
+}
+
+// field may be empty; the JS ignores an empty data-field-error.
+func writeTaskErrorFragment(w http.ResponseWriter, field, message string) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusBadRequest)
-	fmt.Fprintf(w, `<div class="rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-200" role="alert"><strong class="font-semibold">Couldn&apos;t save:</strong> Taskwarrior rejected one of the dates. Try +2d, tomorrow, eod, or YYYY-MM-DD.</div>`)
-	return true
+	fmt.Fprintf(w, `<div class="rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-200" data-field-error=%q role="alert"><strong class="font-semibold">Couldn&apos;t save:</strong> %s</div>`,
+		field, html.EscapeString(message))
 }
